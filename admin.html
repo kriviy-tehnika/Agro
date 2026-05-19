@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Адмін — Кривий Техніка</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    .admin-login-screen {
+      position: fixed; inset: 0;
+      background: var(--dark);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9000;
+      flex-direction: column;
+      gap: 0;
+    }
+    .admin-login-box {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 2.5rem 2.5rem 2rem;
+      width: 100%; max-width: 360px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+      text-align: center;
+    }
+    .admin-login-logo {
+      width: 64px; height: 64px;
+      background: var(--steel);
+      border-radius: 12px;
+      margin: 0 auto 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-h); font-weight: 800; font-size: 1.5rem;
+      color: var(--white);
+    }
+    .admin-login-title {
+      font-family: var(--font-h); font-weight: 800;
+      font-size: 1.2rem; margin-bottom: .3rem;
+    }
+    .admin-login-sub { font-size: .82rem; color: var(--gray); margin-bottom: 1.6rem; }
+    .admin-pin-input {
+      width: 100%; text-align: center;
+      font-family: var(--font-h); font-size: 1.4rem;
+      letter-spacing: .4em;
+      padding: .75rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: 6px; outline: none;
+      margin-bottom: .8rem;
+      transition: border-color .2s;
+    }
+    .admin-pin-input:focus { border-color: var(--steel); }
+    .admin-login-err {
+      color: #C0392B; font-size: .82rem;
+      margin-bottom: .8rem; display: none;
+    }
+    .admin-back {
+      display: block; margin-top: 1rem;
+      font-size: .8rem; color: var(--gray);
+      text-decoration: none; transition: color .2s;
+    }
+    .admin-back:hover { color: var(--steel); }
+  </style>
+</head>
+<body>
+
+  <div class="admin-login-screen" id="adminLoginScreen">
+    <div class="admin-login-box">
+      <div class="admin-login-logo">КТ</div>
+      <div class="admin-login-title">Адміністративна панель</div>
+      <div class="admin-login-sub">Кривий Техніка · Закритий розділ</div>
+      <input
+        class="admin-pin-input"
+        type="password"
+        id="adminPinInput"
+        placeholder="••••"
+        maxlength="6"
+        autocomplete="off"
+      />
+      <div class="admin-login-err" id="adminPinErr">Невірний пін-код. Спробуйте ще раз.</div>
+      <button class="btn btn--primary" style="width:100%;" onclick="checkAdminPin()">Увійти</button>
+      <a href="index.html" class="admin-back">← Повернутись на сайт</a>
+    </div>
+  </div>
+
+  <div id="adminPanel" style="display:none;">
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <div class="topbar__left">
+          <span class="topbar__item" style="color:var(--steel); font-weight:700;">⚙ Адміністративна панель</span>
+        </div>
+        <div class="topbar__right">
+          <a href="index.html" class="topbar__item">← На сайт</a>
+          <button onclick="adminLogout()" class="topbar__item" style="background:none;border:none;cursor:pointer;color:#C0392B;font-size:.78rem;">🔒 Вийти</button>
+        </div>
+      </div>
+    </div>
+
+    <header class="header">
+      <div class="header__inner">
+        <div class="logo">
+          <div class="logo__icon" style="background:var(--steel);">КТ</div>
+          <div class="logo__text-wrap">
+            <span class="logo__name">КРИВИЙ ТЕХНІКА</span>
+            <span class="logo__sub">Панель адміністратора</span>
+          </div>
+        </div>
+        <div style="margin-left:auto; display:flex; gap:.8rem; align-items:center;">
+          <a href="catalog.html" class="btn btn--outline btn--sm"> Переглянути каталог</a>
+          <button onclick="adminLogout()" class="btn btn--dark btn--sm"> Вийти</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-hero" style="padding:2rem 1.5rem;">
+      <div class="page-hero__inner">
+        <span class="section-tag">Управління</span>
+        <h1 class="page-hero__title">⚙ Адмін <span class="accent">Панель</span></h1>
+        <p>Додавання та керування технікою в каталозі.</p>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <div class="admin-section__inner">
+        <div class="admin-grid">
+
+          <div class="admin-form-wrap">
+            <h2>➕ Додати техніку</h2>
+            <div id="adminFormMsg" class="form-msg"></div>
+            <div class="form" id="adminForm">
+              <div class="form__group">
+                <label class="form__label">Назва *</label>
+                <input class="form__input" type="text" id="aName" placeholder="напр. John Deere 6120M" />
+              </div>
+              <div class="form__group">
+                <label class="form__label">Категорія *</label>
+                <select class="form__select" id="aCat">
+                  <option value="">— Оберіть категорію —</option>
+                  <option value="tractors"> Трактори</option>
+                  <option value="combines"> Комбайни</option>
+                  <option value="sprayers"> Обприскувачі</option>
+                  <option value="plows"> Плуги та культиватори</option>
+                  <option value="trailers"> Причепи</option>
+                  <option value="irrigation"> Зрошення та насоси</option>
+                  <option value="engines"> Двигуни та агрегати</option>
+                  <option value="parts"> Запчастини</option>
+                  <option value="other"> Інше</option>
+                </select>
+              </div>
+              <div class="form__group">
+                <label class="form__label">Опис</label>
+                <textarea class="form__textarea" id="aDesc" placeholder="Короткий опис техніки..."></textarea>
+              </div>
+              <div class="form__group">
+                <label class="form__label">Ціна</label>
+                <input class="form__input" type="text" id="aPrice" placeholder="напр. 2 500 000 грн або «За запитом»" />
+              </div>
+              <div class="form__group">
+                <label class="form__label">Фото техніки</label>
+                <div class="photo-upload" id="photoUploadArea">
+                  <input type="file" id="aPhoto" accept="image/*" style="display:none;" />
+                  <img id="aPhotoPreview" src="" alt="Прев'ю" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:4px;margin-bottom:.6rem;" />
+                  <button type="button" class="btn btn--outline btn--sm" style="width:100%;" onclick="document.getElementById('aPhoto').click()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Вибрати фото (до 2 МБ)
+                  </button>
+                  <p style="font-size:.72rem;color:#AAA;margin-top:.4rem;text-align:center;">JPG, PNG, WEBP</p>
+                </div>
+              </div>
+              <div class="form__group">
+                <label class="form__label">Статус</label>
+                <select class="form__select" id="aStatus">
+                  <option value="available"> В наявності</option>
+                  <option value="order"> Під замовлення</option>
+                  <option value="sold"> Продано</option>
+                </select>
+              </div>
+              <button class="btn btn--primary" type="button" id="adminAddBtn"> Додати в каталог</button>
+            </div>
+          </div>
+
+          <div class="admin-list-wrap">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.8rem;">
+              <h2 style="margin:0;"> Техніка в каталозі</h2>
+              <button class="btn btn--outline btn--sm" id="clearAllBtn">🗑 Очистити все</button>
+            </div>
+            <div class="admin-items" id="adminItems"></div>
+            <div id="adminEmpty" style="display:none;text-align:center;padding:2rem;color:#888;">
+              <p style="font-size:2.5rem;">📭</p>
+              <p>Каталог порожній. Додайте першу одиницю техніки.</p>
+            </div>
+          </div>
+
+        </div>
+
+
+        <div style="margin-top:3rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.8rem;">
+            <h2 style="font-family:var(--font-h);font-weight:800;font-size:1.3rem;"> Гарантійні заявки</h2>
+            <span id="warrantyCount" style="font-size:.85rem;color:var(--gray);"></span>
+          </div>
+          <div id="warrantyItems" class="admin-items"></div>
+          <div id="warrantyEmpty" style="display:none;text-align:center;padding:2rem;color:#888;"><p>Гарантійних заявок ще немає.</p></div>
+        </div>
+
+        <div style="margin-top:3rem;">
+          <h2 style="font-family:var(--font-h);font-weight:800;font-size:1.3rem;margin-bottom:1.5rem;"> Замовлення та заявки</h2>
+          <div id="contactItems" class="admin-items"></div>
+          <div id="contactEmpty" style="display:none;text-align:center;padding:2rem;color:#888;"><p>Заявок ще немає.</p></div>
+        </div>
+
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer__bottom" style="margin-top:0;border-top:1px solid #222;">
+        <p>© 2025 Кривий Техніка — Адміністративна панель</p>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="js/catalog-data.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    const ADMIN_PIN     = '1234';   
+    const ADMIN_SESSION = 'kt_admin_auth';
+
+    function checkAdminPin() {
+      const val = document.getElementById('adminPinInput').value;
+      if (val === ADMIN_PIN) {
+        sessionStorage.setItem(ADMIN_SESSION, '1');
+        showAdminPanel();
+      } else {
+        const err = document.getElementById('adminPinErr');
+        err.style.display = 'block';
+        document.getElementById('adminPinInput').value = '';
+        document.getElementById('adminPinInput').focus();
+      }
+    }
+
+    function adminLogout() {
+      sessionStorage.removeItem(ADMIN_SESSION);
+      location.reload();
+    }
+
+    function showAdminPanel() {
+      document.getElementById('adminLoginScreen').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      initAdmin();
+    }
+
+    if (sessionStorage.getItem(ADMIN_SESSION) === '1') {
+      showAdminPanel();
+    }
+
+    document.getElementById('adminPinInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') checkAdminPin();
+    });
+  </script>
+</body>
+</html>
