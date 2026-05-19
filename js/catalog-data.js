@@ -40,34 +40,22 @@ const STATUS_COLORS = {
 };
 
 
-// --------------- API-запити ---------------
+//  API-запити 
 
 async function apiGet(url) {
-  const res = await fetch(url);
-  return res.json();
+  return API.get(url);
 }
 
 async function apiPost(url, data) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  return res.json();
+  return API.post(url, data);
 }
 
 async function apiPatch(url, data) {
-  const res = await fetch(url, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  return res.json();
+  return API.patch(url, data);
 }
 
 async function apiDelete(url) {
-  const res = await fetch(url, { method: 'DELETE' });
-  return res.json();
+  return API.delete(url);
 }
 
 
